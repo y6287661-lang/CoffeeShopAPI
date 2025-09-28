@@ -1,0 +1,21 @@
+﻿# ملفات البناء
+bin/
+obj/
+
+# ملفات النظام
+*.dll
+*.exe
+*.pdb
+
+# إعدادات المستخدم
+*.user
+*.suo
+*.cache
+
+# إعدادات Visual Studio
+.vs/
+.vscode/
+
+# ملفات النشر المؤقتة
+*.log
+*.DS_Store
