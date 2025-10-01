@@ -7,6 +7,7 @@ obj/
 *.exe
 *.pdb
 
+
 # إعدادات المستخدم
 *.user
 *.suo
@@ -14,8 +15,14 @@ obj/
 
 # إعدادات Visual Studio
 .vs/
-.vscode/
+*.suo
+*.user
+*.vsidx
+*.ipch
+*.cache
 
 # ملفات النشر المؤقتة
+publish/
 *.log
 *.DS_Store
+*.tlog
