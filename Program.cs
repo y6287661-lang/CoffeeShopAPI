@@ -1,31 +1,40 @@
 ﻿using API_Neeew.Data;
+using API_Neeew.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ✅ تسجيل الخدمات الأساسية
+// 🟢 إعداد سلسلة الاتصال بقاعدة بيانات PostgreSQL على Railway
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// 🟢 إضافة الكنترولرات
 builder.Services.AddControllers();
 
-// ✅ تفعيل Swagger لتوثيق الـ API
+// 🟢 إعداد Swagger لتوثيق الـ API
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "API_Neeew",
+        Version = "v1",
+        Description = "User Management API for Flutter Integration"
+    });
+});
 
-// ✅ تسجيل DbContext مع SQL Server
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-        sqlOptions => sqlOptions.EnableRetryOnFailure()
-    ));
-
-// ✅ تفعيل CORS للسماح بالوصول من تطبيقات خارجية
+// 🟢 إعداد سياسة CORS للسماح بالاتصال من أي جهة (مفيد لـ Flutter)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
-        policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader());
 });
 
-// ✅ تحسين التحقق من المدخلات
+// 🟢 تفعيل التحقق من النموذج
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
     options.SuppressModelStateInvalidFilter = false;
@@ -33,24 +42,26 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 
 var app = builder.Build();
 
-// ✅ تفعيل Swagger فقط في بيئة التطوير
-if (app.Environment.IsDevelopment())
+// 🟢 تفعيل Swagger في جميع البيئات (اختياري للنشر)
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "API_Neeew v1");
+    c.RoutePrefix = "swagger";
+});
 
-// ✅ تفعيل CORS
+// 🟢 ترتيب الـ Middleware
 app.UseCors("AllowAll");
 
-// ✅ تفعيل HTTPS
+
 app.UseHttpsRedirection();
 
-// ✅ تفعيل التفويض (Authorization)
+
+
 app.UseAuthorization();
 
-// ✅ ربط الـ Controllers
+
 app.MapControllers();
 
-// ✅ تشغيل التطبيق
+
 app.Run();
