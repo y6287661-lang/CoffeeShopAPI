@@ -79,7 +79,13 @@ namespace API_Neeew.Controllers
                 new Claim(ClaimTypes.Email, user.Email)
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+            var jwtKey = _configuration["Jwt:Key"];
+            if (string.IsNullOrEmpty(jwtKey))
+            {
+                return StatusCode(500, new { message = "مفتاح JWT غير معرف في الإعدادات" });
+            }
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(

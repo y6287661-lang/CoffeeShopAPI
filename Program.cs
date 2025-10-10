@@ -9,12 +9,22 @@ var builder = WebApplication.CreateBuilder(args);
 
 // إضافة الخدمات
 builder.Services.AddControllers();
+
+
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+
 
 // إعداد الاتصال بقاعدة البيانات
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// التحقق من وجود مفتاح JWT لتجنب التحذير CS8604
+var jwtKey = builder.Configuration["Jwt:Key"];
+if (string.IsNullOrEmpty(jwtKey))
+{
+    throw new InvalidOperationException("مفتاح JWT غير معرف في appsettings.json");
+}
 
 // إعداد التوثيق باستخدام JWT
 builder.Services.AddAuthentication(options =>
@@ -32,8 +42,8 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
         ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+
     };
 
 });
