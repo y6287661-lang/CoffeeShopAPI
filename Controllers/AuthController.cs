@@ -17,20 +17,26 @@ namespace API_Neeew.Controllers
             _context = context;
         }
 
-        [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginDto dto)
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterDto dto)
         {
-            var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.Email == dto.Email && u.Password == dto.Password);
-
-            if (user == null)
-                return Unauthorized(new { message = "بيانات الدخول غير صحيحة" });
-
-            return Ok(new
+            var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
+            if (existingUser != null)
             {
-                message = "تم تسجيل الدخول بنجاح",
-                user = new { user.Id, user.Name, user.Email }
-            });
+                return BadRequest("البريد الإلكتروني مستخدم مسبقًا");
+            }
+
+            var user = new User
+            {
+                Name = dto.Name,
+                Email = dto.Email,
+                Password = dto.Password // يُفضل تشفيرها لاحقًا
+            };
+
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "تم إنشاء الحساب بنجاح", user });
         }
     }
 }
